@@ -34,7 +34,7 @@
         }
         #startScreenText {
             background-color: rgba(255, 255, 255, 0.8);
-            padding: 20px;
+            padding: 5px;
             border-radius: 10px;
             width: 80%;  
             margin-bottom: 50px;
@@ -51,9 +51,11 @@
         }
         #bradBit {
             position: absolute;
-            bottom: -200px;
-            width: 300px;
-            transition: bottom 1s ease;
+            bottom: -100px;
+            right: 5px;
+
+           
+            
         }
         #muteButton {
             position: absolute;
@@ -67,18 +69,56 @@
             font-size: 16px;
             font-family: 'Press Start 2P', cursive;
         }
-        #gameOverScreen {
-            display: none;
+        #music-selector {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+            bottom: 20px;
+            left: 20px;
             font-family: 'Press Start 2P', cursive;
             color: white;
+            text-align: left;
+            width: 220px;
         }
-        #gameOverScreen h1 {
-            font-size: 48px;
+        #radioImage {
+            max-width: 250px;
+            margin-bottom: 10px;
+        }
+        #music-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 200px;
+            height: 10px;
+            background: #fff;
+            outline: none;
+            border-radius: 10px;
+            margin-top: 0px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: block;
+        }
+        #music-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #d896ff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        #music-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #d896ff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        #musicName {
+            font-size: 20px;
+            color: #ffff66;
+            margin-top: 10px;
+            text-align: left;
+            width: 200px;
+            display: block;
+            word-wrap: break-word;
         }
         #bmLives {
             position: absolute;
@@ -165,10 +205,9 @@
             width: 50%;
             background-color: rgba(0, 0, 0, 0.2);
             z-index: 1;
-            display: none; /* Döljs på större skärmar */
+            display: none;
         }
 
-        /* Visa pekskärmszonerna på mobiler */
         @media (max-width: 768px) {
             #leftTouchZone, #rightTouchZone {
                 display: block;
@@ -194,7 +233,7 @@
     <div id="startScreen">
         <div id="startScreenText">
             <h1>BRAD BIT - DRIVE IN GAME</h1>
-            <p>Brad Bit ska köra till Byggmax och handla billigt. <br>Fånga pengasäckarna för att ta dig <br> hela vägen till Byggmax Drive in.</p>
+            <p>Brad Bit ska köra till Byggmax och handla billigt.<br> Fånga pengapåsar och ta dig <br> hela vägen till Byggmax drive in.</p>
         </div>
         <button id="startButton">Let's Go!</button>
         <img id="bradBit" src="Brad Bit Player.png" alt="Brad Bit Player">
@@ -205,390 +244,365 @@
         <button id="playAgainButton">PLAY AGAIN</button>
     </div>
 
-    <!-- BM-loggor för att visa hur många liv som är kvar -->
     <div id="bmLives"></div>
-
-    <!-- Timer -->
     <div id="timer">Tid: 0 sekunder</div>
 
-    <!-- Highscore Input -->
     <div id="highScoreInput">
         <h2>Skriv in ditt namn för High Score</h2>
         <input type="text" id="playerName" placeholder="Ditt namn">
         <button id="submitScoreButton">Spara och spela igen</button>
     </div>
 
-    <!-- Highscore-lista -->
     <div id="highScores">
         <h2>High Score</h2>
         <ul id="highScoreList"></ul>
     </div>
 
-    <!-- Mute-knapp -->
     <button id="muteButton">Mute</button>
 
-    <!-- Feedback för bra spel -->
     <div id="feedback">NICE!</div>
 
-    <!-- Touch-kontroller -->
     <div id="leftTouchZone"></div>
     <div id="rightTouchZone"></div>
 
+    <!-- Musikväljare -->
+    <div id="music-selector">
+        <img id="radioImage" src="radioplayer.png" alt="Radio Player">
+        <input type="range" id="music-slider" min="0" max="1" step="1" value="0">
+        <div id="musicName">Byggmax Bound</div>
+    </div>
+
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const startScreen = document.getElementById('startScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const startButton = document.getElementById('startButton');
-        const playAgainButton = document.getElementById('playAgainButton');
-        const muteButton = document.getElementById('muteButton');
-        const backgroundMusic = document.getElementById('backgroundMusic');
-        const letsGoSound = document.getElementById('letsGoSound');
-        const bmLogoSound = document.getElementById('bmLogoSound');
-        const bradBit = document.getElementById('bradBit');
-        const bmLivesContainer = document.getElementById('bmLives');
-        const timerDisplay = document.getElementById('timer');
-        const highScoreInput = document.getElementById('highScoreInput');
-        const highScoreList = document.getElementById('highScoreList');
-        const submitScoreButton = document.getElementById('submitScoreButton');
-        const feedback = document.getElementById('feedback');
-        let isMuted = false;
-        let highscores = JSON.parse(localStorage.getItem('highscores')) || [];
-        let playerName = '';
-        let gameStarted = false;
-        let timeWithoutLosingLife = 0;
-        let niceShown = false;
+        document.addEventListener("DOMContentLoaded", function() {
+            let currentMusic = new Audio('Byggmax_bound.mp3');
+            currentMusic.loop = true;
+            currentMusic.play();
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+            const musicNames = ["Byggmax Bound", "Online Game"];
+            const musicFiles = ['Byggmax_bound.mp3', 'online game.mp3'];
+            const musicSlider = document.getElementById('music-slider');
+            const musicName = document.getElementById('musicName');
 
-        const fireballImg = loadImage('fireball-removebg-preview.png');
-        const whiskeyImg = loadImage('overpriced.png');
-        const moneyBoostImg = loadImage('peng-removebg-preview.png');
-        const carImg = loadImage('truck.png');
-        const backgroundImg1 = loadImage('bg1.jpg');
-        const backgroundImg2 = loadImage('bg2.jpg');
-        const backgroundImg3 = loadImage('city_background.png');
-        const backgroundImg4 = loadImage('bg6.png');
-        const backgroundImg5 = loadImage('bg7.png');
+            function changeMusic(index) {
+                currentMusic.pause();
+                currentMusic = new Audio(musicFiles[index]);
+                currentMusic.loop = true;
+                currentMusic.play();
+                musicName.textContent = musicNames[index];
+            }
 
-        let currentBackground = backgroundImg1;
+            musicSlider.addEventListener('input', function() {
+                changeMusic(musicSlider.value);
+            });
 
-        function loadImage(src) {
-            const img = new Image();
-            img.src = src;
-            img.onerror = function() {
-                console.error("Bild kunde inte laddas: " + src);
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const startScreen = document.getElementById('startScreen');
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            const startButton = document.getElementById('startButton');
+            const playAgainButton = document.getElementById('playAgainButton');
+            const muteButton = document.getElementById('muteButton');
+            const letsGoSound = document.getElementById('letsGoSound');
+            const bmLogoSound = document.getElementById('bmLogoSound');
+            const bradBit = document.getElementById('bradBit');
+            const bmLivesContainer = document.getElementById('bmLives');
+            const timerDisplay = document.getElementById('timer');
+            const highScoreInput = document.getElementById('highScoreInput');
+            const highScoreList = document.getElementById('highScoreList');
+            const submitScoreButton = document.getElementById('submitScoreButton');
+            const feedback = document.getElementById('feedback');
+            let isMuted = false;
+            let highscores = JSON.parse(localStorage.getItem('highscores')) || [];
+            let playerName = '';
+            let gameStarted = false;
+            let timeWithoutLosingLife = 0;
+            let niceShown = false;
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const fireballImg = loadImage('fireball-removebg-preview.png');
+            const whiskeyImg = loadImage('overpriced.png');
+            const moneyBoostImg = loadImage('peng-removebg-preview.png');
+            const carImg = loadImage('truck.png');
+            const backgroundImg1 = loadImage('bg1.jpg');
+            const backgroundImg2 = loadImage('bg2.jpg');
+            const backgroundImg3 = loadImage('city_background.png');
+            const backgroundImg4 = loadImage('bg6.png');
+            const backgroundImg5 = loadImage('bg7.png');
+
+            let currentBackground = backgroundImg1;
+
+            function loadImage(src) {
+                const img = new Image();
+                img.src = src;
+                img.onerror = function() {
+                    console.error("Bild kunde inte laddas: " + src);
+                };
+                return img;
+            }
+
+            let player = {
+                x: canvas.width / 2 - 100,
+                y: canvas.height - 250,
+                width: 200,
+                height: 200,
+                speed: 5,
+                moveLeft: false,
+                moveRight: false,
+                moveUp: false,
+                moveDown: false,
+                lives: 3
             };
-            return img;
-        }
 
-        let player = {
-            x: canvas.width / 2 - 100,
-            y: canvas.height - 250,
-            width: 200,
-            height: 200,
-            speed: 5,
-            moveLeft: false,
-            moveRight: false,
-            moveUp: false,
-            moveDown: false,
-            lives: 3
-        };
+            let obstacles = [];
+            let obstacleSpeed = 1.5;
+            let score = 0;
+            let gameOverFlag = false;
+            let startTime = 0;
+            let elapsedTime = 0;
 
-        let obstacles = [];
-        let obstacleSpeed = 1.5;
-        let score = 0;
-        let gameOverFlag = false;
-        let startTime = 0;
-        let elapsedTime = 0;
+            const roadWidth = canvas.width * 0.5;
+            const roadX = (canvas.width - roadWidth) / 2;
 
-        const roadWidth = canvas.width * 0.5;
-        const roadX = (canvas.width - roadWidth) / 2;
-
-        function addLifeDisplay() {
-            bmLivesContainer.innerHTML = '';
-            for (let i = 0; i < player.lives; i++) {
-                const img = document.createElement('img');
-                img.src = 'BM.png';
-                img.style.width = '50px';
-                img.style.marginLeft = '10px';
-                bmLivesContainer.appendChild(img);
-            }
-        }
-
-        window.addEventListener('keydown', function(e) {
-            if (e.code === 'ArrowLeft') player.moveLeft = true;
-            if (e.code === 'ArrowRight') player.moveRight = true;
-            if (e.code === 'ArrowUp') player.moveUp = true;
-            if (e.code === 'ArrowDown') player.moveDown = true;
-        });
-
-        window.addEventListener('keyup', function(e) {
-            if (e.code === 'ArrowLeft') player.moveLeft = false;
-            if (e.code === 'ArrowRight') player.moveRight = false;
-            if (e.code === 'ArrowUp') player.moveUp = false;
-            if (e.code === 'ArrowDown') player.moveDown = false;
-        });
-
-        // Hantera pekskärmskontroller
-        const leftTouchZone = document.getElementById('leftTouchZone');
-        const rightTouchZone = document.getElementById('rightTouchZone');
-
-        leftTouchZone.addEventListener('touchstart', function() {
-            player.moveLeft = true;
-        });
-
-        leftTouchZone.addEventListener('touchend', function() {
-            player.moveLeft = false;
-        });
-
-        rightTouchZone.addEventListener('touchstart', function() {
-            player.moveRight = true;
-        });
-
-        rightTouchZone.addEventListener('touchend', function() {
-            player.moveRight = false;
-        });
-
-        function createObstacle() {
-            const obstacleType = Math.random() < 0.7 ? 'fireball' : 'whiskey';
-            const obstacleSize = 80;
-            const obstacleX = Math.random() * (roadWidth - obstacleSize) + roadX;
-            obstacles.push({
-                x: obstacleX,
-                y: -100,
-                width: obstacleSize,
-                height: obstacleSize,
-                type: obstacleType
-            });
-        }
-
-        function createMoneyBoost() {
-            const boostX = Math.random() * (roadWidth - 80) + roadX;
-            obstacles.push({
-                x: boostX,
-                y: -100,
-                width: 80,
-                height: 80,
-                type: 'money'
-            });
-        }
-
-        function drawPlayer() {
-            ctx.drawImage(carImg, player.x, player.y, player.width, player.height);
-        }
-
-        function drawBackground() {
-            ctx.drawImage(currentBackground, 0, 0, canvas.width, canvas.height);
-        }
-
-        function drawObstacle(obstacle) {
-            if (obstacle.type === 'fireball') {
-                ctx.drawImage(fireballImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            } else if (obstacle.type === 'whiskey') {
-                ctx.drawImage(whiskeyImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            } else if (obstacle.type === 'money') {
-                ctx.drawImage(moneyBoostImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            }
-        }
-
-        function updateObstacles() {
-            for (let i = 0; i < obstacles.length; i++) {
-                const obstacle = obstacles[i];
-                obstacle.y += obstacleSpeed;
-
-                if (obstacle.y > canvas.height) {
-                    obstacles.splice(i, 1);
-                    i--;
+            function addLifeDisplay() {
+                bmLivesContainer.innerHTML = '';
+                for (let i = 0; i < player.lives; i++) {
+                    const img = document.createElement('img');
+                    img.src = 'BM.png';
+                    img.style.width = '50px';
+                    img.style.marginLeft = '10px';
+                    bmLivesContainer.appendChild(img);
                 }
+            }
 
-                if (player.x + 40 < obstacle.x + obstacle.width &&
-                    player.x + player.width - 40 > obstacle.x &&
-                    player.y + 40 < obstacle.y + obstacle.height &&
-                    player.y + player.height - 40 > obstacle.y) {
-                    if (obstacle.type === 'money') {
-                        player.lives++;
-                        addLifeDisplay();
-                        backgroundMusic.volume = 0.3;
-                        bmLogoSound.play();
-                        setTimeout(() => {
-                            backgroundMusic.volume = 1.0;
-                        }, 3000);
-                    } else {
-                        player.lives--;
-                        if (player.lives === 0) {
-                            gameOver();
-                        } else {
-                            addLifeDisplay();
-                        }
+            window.addEventListener('keydown', function(e) {
+                if (e.code === 'ArrowLeft') player.moveLeft = true;
+                if (e.code === 'ArrowRight') player.moveRight = true;
+                if (e.code === 'ArrowUp') player.moveUp = true;
+                if (e.code === 'ArrowDown') player.moveDown = true;
+            });
+
+            window.addEventListener('keyup', function(e) {
+                if (e.code === 'ArrowLeft') player.moveLeft = false;
+                if (e.code === 'ArrowRight') player.moveRight = false;
+                if (e.code === 'ArrowUp') player.moveUp = false;
+                if (e.code === 'ArrowDown') player.moveDown = false;
+            });
+
+            const leftTouchZone = document.getElementById('leftTouchZone');
+            const rightTouchZone = document.getElementById('rightTouchZone');
+
+            leftTouchZone.addEventListener('touchstart', function() {
+                player.moveLeft = true;
+            });
+
+            leftTouchZone.addEventListener('touchend', function() {
+                player.moveLeft = false;
+            });
+
+            rightTouchZone.addEventListener('touchstart', function() {
+                player.moveRight = true;
+            });
+
+            rightTouchZone.addEventListener('touchend', function() {
+                player.moveRight = false;
+            });
+
+            function createObstacle() {
+                const obstacleType = Math.random() < 0.7 ? 'fireball' : 'whiskey';
+                const obstacleSize = 80;
+                const obstacleX = Math.random() * (roadWidth - obstacleSize) + roadX;
+                obstacles.push({
+                    x: obstacleX,
+                    y: -100,
+                    width: obstacleSize,
+                    height: obstacleSize,
+                    type: obstacleType
+                });
+            }
+
+            function createMoneyBoost() {
+                const boostX = Math.random() * (roadWidth - 80) + roadX;
+                obstacles.push({
+                    x: boostX,
+                    y: -100,
+                    width: 80,
+                    height: 80,
+                    type: 'money'
+                });
+            }
+
+            function drawPlayer() {
+                ctx.drawImage(carImg, player.x, player.y, player.width, player.height);
+            }
+
+            function drawBackground() {
+                ctx.drawImage(currentBackground, 0, 0, canvas.width, canvas.height);
+            }
+
+            function drawObstacle(obstacle) {
+                if (obstacle.type === 'fireball') {
+                    ctx.drawImage(fireballImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                } else if (obstacle.type === 'whiskey') {
+                    ctx.drawImage(whiskeyImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                } else if (obstacle.type === 'money') {
+                    ctx.drawImage(moneyBoostImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                }
+            }
+
+            function updateObstacles() {
+                for (let i = 0; i < obstacles.length; i++) {
+                    const obstacle = obstacles[i];
+                    obstacle.y += obstacleSpeed;
+
+                    if (obstacle.y > canvas.height) {
+                        obstacles.splice(i, 1);
+                        i--;
                     }
-                    obstacles.splice(i, 1);
-                    i--;
+
+                    if (player.x + 40 < obstacle.x + obstacle.width &&
+                        player.x + player.width - 40 > obstacle.x &&
+                        player.y + 40 < obstacle.y + obstacle.height &&
+                        player.y + player.height - 40 > obstacle.y) {
+                        if (obstacle.type === 'money') {
+                            player.lives++;
+                            addLifeDisplay();
+                            bmLogoSound.play();
+                        } else {
+                            player.lives--;
+                            if (player.lives === 0) {
+                                gameOver();
+                            } else {
+                                addLifeDisplay();
+                            }
+                        }
+                        obstacles.splice(i, 1);
+                        i--;
+                    }
                 }
             }
-        }
 
-        function drawTimer() {
-            elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-            timerDisplay.textContent = 'Tid: ' + elapsedTime + ' sekunder';
+            function drawTimer() {
+                elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                timerDisplay.textContent = 'Tid: ' + elapsedTime + ' sekunder';
 
-            if (elapsedTime >= 30 && elapsedTime < 60 && currentBackground === backgroundImg1) {
-                currentBackground = backgroundImg2;
+                if (elapsedTime >= 30 && elapsedTime < 60 && currentBackground === backgroundImg1) {
+                    currentBackground = backgroundImg2;
+                }
+
+                if (elapsedTime >= 60 && elapsedTime < 90 && currentBackground === backgroundImg2) {
+                    currentBackground = backgroundImg3;
+                }
+
+                if (elapsedTime >= 90 && elapsedTime < 110 && currentBackground === backgroundImg3) {
+                    currentBackground = backgroundImg4;
+                }
+
+                if (elapsedTime >= 110 && currentBackground === backgroundImg4) {
+                    currentBackground = backgroundImg5;
+                }
+
+                if (elapsedTime >= 15 && !niceShown) {
+                    feedback.style.display = 'block';
+                    setTimeout(() => feedback.style.display = 'none', 2000);
+                    niceShown = true;
+                } else if (elapsedTime % 15 === 0 && elapsedTime > 0) {
+                    feedback.style.display = 'block';
+                    setTimeout(() => feedback.style.display = 'none', 2000);
+                }
             }
 
-            if (elapsedTime >= 60 && elapsedTime < 90 && currentBackground === backgroundImg2) {
-                currentBackground = backgroundImg3;
+            function gameOver() {
+                gameOverFlag = true;
+                cancelAnimationFrame(update);
+                currentMusic.pause();
+                showHighScoreInput();
             }
 
-            if (elapsedTime >= 90 && elapsedTime < 110 && currentBackground === backgroundImg3) {
-                currentBackground = backgroundImg4;
-            }
-
-            if (elapsedTime >= 110 && currentBackground === backgroundImg4) {
-                currentBackground = backgroundImg5;
-            }
-
-            if (elapsedTime >= 15 && !niceShown) {
-                feedback.style.display = 'block';
-                setTimeout(() => feedback.style.display = 'none', 2000);
-                niceShown = true;
-            } else if (elapsedTime % 15 === 0 && elapsedTime > 0) {
-                feedback.style.display = 'block';
-                setTimeout(() => feedback.style.display = 'none', 2000);
-            }
-        }
-
-        function gameOver() {
-            gameOverFlag = true;
-            cancelAnimationFrame(update);
-            backgroundMusic.pause();
-            showBradBitAtGameOver();
-            showHighScoreInput();
-        }
-
-        function resetGame() {
-            gameOverFlag = false;
-            player.x = canvas.width / 2 - 100;
-            player.y = canvas.height - 250;
-            player.lives = 3;
-            addLifeDisplay();
-            obstacles = [];
-            score = 0;
-            startTime = Date.now();
-            timeWithoutLosingLife = 0;
-            niceShown = false;
-            gameOverScreen.style.display = 'none';
-            highScoreInput.style.display = 'none';
-            currentBackground = backgroundImg1;
-            backgroundMusic.currentTime = 0;
-            backgroundMusic.play();
-            update();
-        }
-
-        function update() {
-            if (gameOverFlag) return;
-
-            score++;
-
-            if (elapsedTime >= 30) {
-                obstacleSpeed += 0.01;
-            }
-
-            if (player.moveLeft && player.x > roadX) player.x -= player.speed;
-            if (player.moveRight && player.x < roadX + roadWidth - player.width) player.x += player.speed;
-            if (player.moveUp && player.y > 400) player.y -= player.speed;
-            if (player.moveDown && player.y < canvas.height - player.height) player.y += player.speed;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            drawBackground();
-            drawPlayer();
-            obstacles.forEach(drawObstacle);
-            updateObstacles();
-            drawTimer();
-
-            if (Math.random() < 0.01) {
-                createObstacle();
-            }
-
-            if (Math.random() < 0.003) {
-                createMoneyBoost();
-            }
-
-            requestAnimationFrame(update);
-        }
-
-        function showHighScoreInput() {
-            highScoreInput.style.display = 'block';
-        }
-
-        function addHighScore() {
-            playerName = document.getElementById('playerName').value;
-            highscores.push({ name: playerName, time: elapsedTime });
-            highscores.sort((a, b) => b.time - a.time);
-            
-            if (highscores.length > 10) {
-                highscores = highscores.slice(0, 10);
-            }
-            
-            localStorage.setItem('highscores', JSON.stringify(highscores));
-            displayHighScores();
-        }
-
-        function displayHighScores() {
-            highScoreList.innerHTML = '';
-            highscores.forEach((score, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${score.name} - ${score.time} sekunder`;
-                highScoreList.appendChild(li);
-            });
-            document.getElementById('highScores').style.display = 'block';
-        }
-
-        function showBradBit() {
-            bradBit.style.bottom = '0px';
-        }
-
-        function showBradBitAtGameOver() {
-            bradBit.style.bottom = '0px';
-            bradBit.style.transition = 'left 3s linear';
-            bradBit.style.left = '100%';
-        }
-
-        startButton.addEventListener('click', () => {
-            letsGoSound.play();
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-                startTime = Date.now();
-                backgroundMusic.play();
+            function resetGame() {
+                gameOverFlag = false;
+                player.x = canvas.width / 2 - 100;
+                player.y = canvas.height - 250;
+                player.lives = 3;
                 addLifeDisplay();
+                obstacles = [];
+                score = 0;
+                startTime = Date.now();
+                niceShown = false;
+                gameOverScreen.style.display = 'none';
+                highScoreInput.style.display = 'none';
+                currentBackground = backgroundImg1;
+                currentMusic.currentTime = 0;
+                currentMusic.play();
                 update();
-            }, 1000);
-        });
-
-        playAgainButton.addEventListener('click', resetGame);
-
-        submitScoreButton.addEventListener('click', () => {
-            addHighScore();
-            resetGame();
-        });
-
-        setTimeout(showBradBit, 1500);
-
-        muteButton.addEventListener('click', () => {
-            if (!isMuted) {
-                backgroundMusic.muted = true;
-                bmLogoSound.muted = true;
-                letsGoSound.muted = true;
-                muteButton.textContent = 'Unmute';
-            } else {
-                backgroundMusic.muted = false;
-                bmLogoSound.muted = false;
-                letsGoSound.muted = false;
-                muteButton.textContent = 'Mute';
             }
-            isMuted = !isMuted;
+
+            function update() {
+                if (gameOverFlag) return;
+
+                score++;
+
+                if (elapsedTime >= 30) {
+                    obstacleSpeed += 0.01;
+                }
+
+                if (player.moveLeft && player.x > roadX) player.x -= player.speed;
+                if (player.moveRight && player.x < roadX + roadWidth - player.width) player.x += player.speed;
+                if (player.moveUp && player.y > 400) player.y -= player.speed;
+                if (player.moveDown && player.y < canvas.height - player.height) player.y += player.speed;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                drawBackground();
+                drawPlayer();
+                obstacles.forEach(drawObstacle);
+                updateObstacles();
+                drawTimer();
+
+                if (Math.random() < 0.01) {
+                    createObstacle();
+                }
+
+                if (Math.random() < 0.003) {
+                    createMoneyBoost();
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            startButton.addEventListener('click', () => {
+                letsGoSound.play();
+                setTimeout(() => {
+                    startScreen.style.display = 'none';
+                    document.getElementById('music-selector').style.display = 'none'; // Dölj musikväljaren
+                    startTime = Date.now();
+                    currentMusic.play();
+                    addLifeDisplay();
+                    update();
+                }, 1000);
+            });
+
+            playAgainButton.addEventListener('click', resetGame);
+
+            submitScoreButton.addEventListener('click', () => {
+                resetGame();
+            });
+
+            muteButton.addEventListener('click', () => {
+                if (!isMuted) {
+                    currentMusic.muted = true;
+                    bmLogoSound.muted = true;
+                    letsGoSound.muted = true;
+                    muteButton.textContent = 'Unmute';
+                } else {
+                    currentMusic.muted = false;
+                    bmLogoSound.muted = false;
+                    letsGoSound.muted = false;
+                    muteButton.textContent = 'Mute';
+                }
+                isMuted = !isMuted;
+            });
         });
     </script>
 </body>
