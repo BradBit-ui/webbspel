@@ -54,7 +54,7 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            max-width: 100px;
+            max-width: 80px;
             z-index: 4;
         }
         #muteButton {
@@ -226,28 +226,37 @@
                 height: auto;
             }
             #startButton {
-                font-size: 16px;
-                padding: 10px 20px;
+                font-size: 14px;
+                padding: 8px 16px;
             }
             #startScreenText {
-                font-size: 14px;
-                width: 90%;
+                font-size: 12px;
+                width: 85%;
                 padding: 5px;
             }
             #muteButton {
                 font-size: 14px;
-                padding: 10px 15px;
-                bottom: 50px;
+                padding: 8px 12px;
+                bottom: 40px;
             }
             #timer {
                 font-size: 16px;
             }
             #bmLives img {
-                width: 30px;
+                width: 25px;
                 margin-left: 5px;
             }
             #music-selector {
                 display: none;
+            }
+            #bradBit {
+                max-width: 60px;
+                bottom: 10px;
+                right: 10px;
+            }
+            #gameCanvas {
+                width: 100%;
+                height: auto;
             }
         }
     </style>
@@ -375,8 +384,8 @@
             let player = {
                 x: canvas.width / 2 - 100,
                 y: canvas.height - 250,
-                width: 200,
-                height: 200,
+                width: window.innerWidth < 768 ? 120 : 200, // Förminska bilen i mobilversionen
+                height: window.innerWidth < 768 ? 120 : 200, // Förminska bilen i mobilversionen
                 speed: 5,
                 moveLeft: false,
                 moveRight: false,
@@ -400,7 +409,7 @@
                 for (let i = 0; i < player.lives; i++) {
                     const img = document.createElement('img');
                     img.src = 'BM.png';
-                    img.style.width = '50px';
+                    img.style.width = window.innerWidth < 768 ? '25px' : '50px';
                     img.style.marginLeft = '10px';
                     bmLivesContainer.appendChild(img);
                 }
@@ -442,7 +451,7 @@
 
             function createObstacle() {
                 const obstacleType = Math.random() < 0.7 ? 'fireball' : 'whiskey';
-                const obstacleSize = 80;
+                const obstacleSize = window.innerWidth < 768 ? 60 : 80;
                 const obstacleX = Math.random() * (roadWidth - obstacleSize) + roadX;
                 obstacles.push({
                     x: obstacleX,
