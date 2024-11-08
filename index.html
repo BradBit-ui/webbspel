@@ -435,19 +435,36 @@
 
             leftTouchZone.addEventListener('touchstart', function() {
                 player.moveLeft = true;
+                startContinuousMove();
             });
 
             leftTouchZone.addEventListener('touchend', function() {
                 player.moveLeft = false;
+                stopContinuousMove();
             });
 
             rightTouchZone.addEventListener('touchstart', function() {
                 player.moveRight = true;
+                startContinuousMove();
             });
 
             rightTouchZone.addEventListener('touchend', function() {
                 player.moveRight = false;
+                stopContinuousMove();
             });
+
+            function startContinuousMove() {
+                if (!gameOverFlag) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            function stopContinuousMove() {
+                // När användaren slutar röra på sig stannar uppdateringarna om spelet inte är över
+                if (!gameOverFlag) {
+                    cancelAnimationFrame(update);
+                }
+            }
 
             function createObstacle() {
                 const obstacleType = Math.random() < 0.7 ? 'fireball' : 'whiskey';
