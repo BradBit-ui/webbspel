@@ -524,7 +524,6 @@
                     const playerName = document.getElementById('playerName').value;
                     if (playerName) {
                         saveHighScore(playerName, score);
-                        displayHighScores();
                         highScores.style.display = 'none'; // Dölj high score-listan efter inskrivning
                     }
                     resetGame();
@@ -547,10 +546,6 @@
                 });
                 highScores.style.display = 'block';
             }
-
-            window.addEventListener('load', () => {
-                displayHighScores();
-            });
 
             function resetGame() {
                 gameOverFlag = false;
