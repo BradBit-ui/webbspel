@@ -525,6 +525,7 @@
                     if (playerName) {
                         saveHighScore(playerName, score);
                         displayHighScores();
+                        highScores.style.display = 'none'; // Dölj high score-listan efter inskrivning
                     }
                     resetGame();
                 });
@@ -564,6 +565,7 @@
                 niceShown = false;
                 gameOverScreen.style.display = 'none';
                 highScoreInput.style.display = 'none';
+                highScores.style.display = 'none'; // Dölj high score-listan när spelet startas om
                 currentBackground = backgroundImg1;
                 currentMusic.currentTime = 0;
                 currentMusic.play();
