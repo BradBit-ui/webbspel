@@ -8,6 +8,58 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         /* ... övrig CSS kod ... */
+
+        #highScoreInput {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            color: black;
+        }
+
+        #highScoreInput input {
+            padding: 10px;
+            font-size: 18px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        #highScoreInput button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 20px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        #highScores {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            color: black;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
+        #highScores h2 {
+            margin-bottom: 20px;
+        }
+
+        #highScores ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #highScores li {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -43,7 +95,37 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // ... övrig JavaScript kod ...
+            let currentMusic = new Audio('Byggmax_bound.mp3');
+            currentMusic.loop = true;
+            currentMusic.play();
+
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const startScreen = document.getElementById('startScreen');
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            const startButton = document.getElementById('startButton');
+            const playAgainButton = document.getElementById('playAgainButton');
+            const muteButton = document.getElementById('muteButton');
+            const letsGoSound = document.getElementById('letsGoSound');
+            const bmLogoSound = document.getElementById('bmLogoSound');
+            const bradBit = document.getElementById('bradBit');
+            const bmLivesContainer = document.getElementById('bmLives');
+            const timerDisplay = document.getElementById('timer');
+            const highScoreInput = document.getElementById('highScoreInput');
+            const highScoreList = document.getElementById('highScoreList');
+            const submitScoreButton = document.getElementById('submitScoreButton');
+            const feedback = document.getElementById('feedback');
+            let isMuted = false;
+            let highscores = JSON.parse(localStorage.getItem('highscores')) || [];
+            let playerName = '';
+            let gameStarted = false;
+            let timeWithoutLosingLife = 0;
+            let niceShown = false;
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // ... övrig spellogik ...
 
             function gameOver() {
                 gameOverFlag = true;
